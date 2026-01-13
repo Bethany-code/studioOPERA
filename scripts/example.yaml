@@ -1,0 +1,14 @@
+persona: rick_morty
+title: "Big-O Notation"
+
+lines:
+  - speaker: rick
+    text: "Listen Morty, Big-O notation is just how fast your stupidity scales with input size. It's not complicated."
+  - speaker: morty
+    text: "W-what does that even mean Rick?"
+  - speaker: rick
+    text: "If you have a loop inside a loop, that's O of n squared. Every extra nested loop? Another power. It's just math, Morty."
+  - speaker: morty
+    text: "So like... bubble sort is bad?"
+  - speaker: rick
+    text: "Bubble sort is O of n squared. It's what people who gave up on life use. Use merge sort. O of n log n. Now shut up, I'm trying to think."
