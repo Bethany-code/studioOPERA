@@ -1,0 +1,11 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.studioopera.suan
+productName: Su_An
+mac:
+  target: dmg
+win:
+  target: nsis
+files: []
+electronVersion: 41.6.1
