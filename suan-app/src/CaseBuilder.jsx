@@ -12,26 +12,29 @@ export default function CaseBuilder({ onBack, onPublish }) {
       setGeneratedJson(`{
   "caseTitle": "Nghịch Lý Bạch Đằng",
   "initialNode": "investigation_1",
-  "inventory": [],
+  "courtRecord": {},
   "evidenceDatabase": {
-    "arrow": { "name": "Mũi Tên Đúc Sắt", "desc": "[KT]: Kỵ binh Mông Cổ dùng tên sắt. Nam Hán dùng tên tre." },
-    "tide": { "name": "Chiến Thuật Thủy Triều", "desc": "[KT 938]: Cọc nhô lên đâm thuyền khi nước rút cạn vào buổi chiều." },
-    "tattoo": { "name": "Hình xăm SÁT THÁT", "desc": "[KT 1284]: Hào khí nhà Trần. Nghĩa là 'Giết Thát Đát'." }
+    "arrow": { "title": "Kho Mộc Bản", "text": "Kỵ binh Mông Cổ nổi danh với mũi tên đúc sắt..." },
+    "tide": { "title": "Ghi chép Thủy Văn", "text": "Cọc gỗ lim chỉ nhô lên đâm thủng thuyền khi pha triều rút cạn..." },
+    "tattoo": { "title": "Hào Khí Đông A", "text": "Năm 1284, binh sĩ tự xăm chữ SÁT THÁT..." }
   },
   "nodes": {
     "investigation_1": {
       "type": "investigation",
-      "location": "Bờ sông Bạch Đằng (Giai đoạn thu thập)",
-      "description": "Bạn phát hiện một cái xác kẹt giữa bãi cọc. Hãy thu thập đủ 3 manh mối trước khi mở phiên tòa.",
+      "location": "Bãi cọc ngầm Bạch Đằng (Khám Nghiệm)",
       "interactables": [
-        { "id": "inv_1", "name": "Khám nghiệm tử thi", "unlocksEvidence": "tattoo", "text": "Bạn lật tay áo nạn nhân. Có hình xăm SÁT THÁT." },
-        { "id": "inv_2", "name": "Kiểm tra vết thương", "unlocksEvidence": "arrow", "text": "Vết thương bị đâm bởi mũi tên đúc sắt nguyên khối." },
-        { "id": "inv_3", "name": "Quan sát mặt nước", "unlocksEvidence": "tide", "text": "Nước sông đang dâng cao dần vào buổi tối." }
+        { 
+          "id": "inv_body", 
+          "name": "Khám nghiệm tử thi", 
+          "unlocksEvidence": "tattoo", 
+          "archiveText": "Tuy nhiên, thi thể này mặc giáp lông thú và có một [đặc điểm nhận dạng của nhà Trần].",
+          "correctKeyword": "đặc điểm nhận dạng của nhà Trần"
+        }
       ],
-      "requiredEvidenceToProceed": ["tattoo", "arrow", "tide"],
-      "nextNode": "court_intro"
+      "requiredEvidence": ["tattoo"],
+      "nextNode": "intro_1"
     }
-    // ...
+    // ... Additional Nodes (Cross Examination)
   }
 }`);
     }, 2000);

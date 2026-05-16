@@ -3,86 +3,85 @@ import WorkshopHub from './WorkshopHub';
 import TrialEngine from './TrialEngine';
 import CaseBuilder from './CaseBuilder';
 
-const MOCK_CASE_DATA = {
+const demoCaseData = {
   caseTitle: "Nghịch Lý Bạch Đằng",
   initialNode: "investigation_1",
-  inventory: [], // Starts empty, filled during investigation
-  evidenceDatabase: {
-    "arrow": { name: "Mũi Tên Đúc Sắt", desc: "[KT]: Kỵ binh Mông Cổ dùng tên sắt. Nam Hán dùng tên tre." },
-    "tide": { name: "Chiến Thuật Thủy Triều", desc: "[KT 938]: Cọc nhô lên đâm thuyền khi nước rút cạn vào buổi chiều." },
-    "tattoo": { name: "Hình xăm SÁT THÁT", desc: "[KT 1284]: Hào khí nhà Trần. Nghĩa là 'Giết Thát Đát'." }
+  courtRecord: {}, // Starts empty. Filled during investigation.
+  evidenceDatabase: { // The master list of unlockables
+    "arrow": { title: "Kho Mộc Bản - Binh Khí Ký", text: "Kỵ binh Mông Cổ nổi danh với mũi tên đúc sắt nguyên khối. Nam Hán dùng tên tre." },
+    "tide": { title: "Ghi chép Thủy Văn Sông Bạch Đằng", text: "Cọc gỗ lim chỉ nhô lên đâm thủng thuyền khi pha triều rút cạn vào buổi chiều." },
+    "tattoo": { title: "Đại Việt Sử Ký - Hào Khí Đông A", text: "Năm 1284, binh sĩ nhà Trần tự xăm hai chữ 'SÁT THÁT' lên tay." }
   },
   nodes: {
     "investigation_1": {
       type: "investigation",
-      location: "Bờ sông Bạch Đằng (Giai đoạn thu thập)",
-      description: "Bạn phát hiện một cái xác kẹt giữa bãi cọc. Hãy thu thập đủ 3 manh mối trước khi mở phiên tòa.",
+      location: "Bãi cọc ngầm Bạch Đằng (Giai đoạn Khám Nghiệm)",
       interactables: [
-        { id: "inv_1", name: "Khám nghiệm tử thi", unlocksEvidence: "tattoo", text: "Bạn lật tay áo nạn nhân. Có hình xăm SÁT THÁT." },
-        { id: "inv_2", name: "Kiểm tra vết thương", unlocksEvidence: "arrow", text: "Vết thương bị đâm bởi mũi tên đúc sắt nguyên khối." },
-        { id: "inv_3", name: "Quan sát mặt nước", unlocksEvidence: "tide", text: "Nước sông đang dâng cao dần vào buổi tối." }
+        { 
+          id: "inv_body", name: "Khám nghiệm y phục tử thi", 
+          unlocksEvidence: "tattoo",
+          archiveText: "Theo phong tục, [lính Nam Hán] thường mặc [giáp da nhẹ]. Tuy nhiên, thi thể này mặc [giáp lông thú] và có một [đặc điểm nhận dạng của quân đội nhà Trần năm 1284].",
+          correctKeyword: "đặc điểm nhận dạng của quân đội nhà Trần năm 1284"
+        },
+        { 
+          id: "inv_wound", name: "Kiểm tra vết thương chí mạng", 
+          unlocksEvidence: "arrow",
+          archiveText: "Khám nghiệm cho thấy [lồng ngực] bị xuyên thủng bởi một [mũi tên đúc sắt nguyên khối] chứ không phải [loại tên tre vót nhọn] thông thường của thủy binh.",
+          correctKeyword: "mũi tên đúc sắt nguyên khối"
+        },
+        { 
+          id: "inv_river", name: "Quan sát mực nước sông", 
+          unlocksEvidence: "tide",
+          archiveText: "Trời đang chập choạng tối, [sóng đánh dữ dội] do [nước sông đang dâng rất cao vào ban đêm], che lấp hoàn toàn [những bãi cọc nhọn] dưới đáy.",
+          correctKeyword: "nước sông đang dâng rất cao vào ban đêm"
+        }
       ],
-      requiredEvidenceToProceed: ["tattoo", "arrow", "tide"],
-      nextNode: "court_intro"
+      requiredEvidence: ["tattoo", "arrow", "tide"],
+      nextNode: "intro_1"
     },
-    "court_intro": {
+    "intro_1": {
       type: "dialogue",
       speaker: "Tướng Ngô Quyền",
-      text: "Các manh mối đã thu thập đủ. Hãy bắt đầu chất vấn tên tù binh Nam Hán này!",
+      text: "Các manh mối đã thu thập đủ! Thám tử, hãy đối chất với tên lính Nam Hán này. Nhớ dùng nút [KHOAN ĐÃ] để ép hắn khai thêm chi tiết!",
       nextNode: "testimony_1"
     },
     "testimony_1": {
       type: "cross_examination",
       speaker: "Tù Binh Nam Hán",
+      timeLimit: 30,
       lines: [
-        "Trời chập choạng tối, nước sông dâng rất cao...",
-        "Tên phiến quân đó mặc áo vải mỏng manh lao tới...",
-        "Con hoảng quá nên dùng cung tre bắn xuyên qua ngực hắn!"
+        { id: "L1", text: "Trời chập choạng tối, nước sông dâng rất cao, sóng đánh dữ dội." },
+        { id: "L2", text: "Con thấy tên phiến quân đó bị thương, trôi dạt trên mặt nước.", pressable: true },
+        { id: "L3", text: "Con hoảng quá nên rút vội cung tên tre bắn hắn để tự vệ." }
       ],
-      weakPointIndex: 2, // The lie is the bamboo arrow
+      hiddenLines: {
+        "L2": { 
+          id: "L2_hidden", speaker: "Tù Binh Nam Hán",
+          text: "Hắn hoàn toàn không di chuyển! Lúc đó xác hắn đang bị kẹt cứng vào một cây cọc gỗ NHÔ LÊN trên mặt nước, nên ta mới nhắm trúng ngực hắn!" 
+        }
+      },
       branches: [
-        { requiredEvidence: "arrow", triggerObjection: true, nextNode: "rebuttal_1" }
+        { requiredLineId: "L2_hidden", requiredEvidence: "tide", triggerObjection: true, nextNode: "climax_1" }
       ],
-      defaultFailText: "Thám Tử: Bằng chứng này không khớp với lời khai!",
+      defaultFailText: "Thám Tử: Khoan đã, bằng chứng này không khớp với câu nói đó!",
       hpPenalty: 1
     },
-    "rebuttal_1": {
+    "climax_1": {
       type: "dialogue",
       speaker: "Thám Tử (Player)",
-      text: "Ngươi nói dối! Vết thương do mũi tên đúc sắt của kỵ binh phương Bắc gây ra, không phải tên tre của Nam Hán!",
-      nextNode: "testimony_2"
+      text: "Ngươi nói dối! Nếu lúc đó là buổi tối nước dâng cao, toàn bộ bãi cọc đã chìm sâu! Cọc chỉ nhô lên khi triều rút vào buổi chiều!",
+      nextNode: "climax_2"
     },
-    "testimony_2": {
-      type: "cross_examination",
-      speaker: "Tù Binh Nam Hán",
-      lines: [
-        "Ta... ta thừa nhận ta không bắn hắn!",
-        "Nhưng ta thấy xác hắn nổi lềnh bềnh trên mặt nước dâng cao...",
-        "Nó vướng vào một thanh gỗ ngầm!"
-      ],
-      weakPointIndex: 1, // The lie is floating at high tide
-      branches: [
-        { requiredEvidence: "tide", triggerObjection: true, nextNode: "rebuttal_2" }
-      ],
-      defaultFailText: "Thám Tử: Không đúng! Lời khai này mâu thuẫn với yếu tố khác!",
-      hpPenalty: 1
-    },
-    "rebuttal_2": {
+    "climax_2": {
       type: "dialogue",
-      speaker: "Thám Tử (Player)",
-      text: "Xác hắn không nổi lềnh bềnh! Nó bị GHIM CHẶT vào cọc dưới đáy sông. Mũi cọc chỉ nhô ra khi triều rút cạn lúc chiều!",
-      nextNode: "climax_twist"
-    },
-    "climax_twist": {
-      type: "dialogue",
-      speaker: "Thám Tử (Player)",
-      text: "Kết hợp với hình xăm SÁT THÁT, người này tử trận năm 1288 (thời Trần) và rơi vào nứt gãy thời gian về đây!",
+      speaker: "Tướng Ngô Quyền",
+      text: "Kết hợp với hình xăm SÁT THÁT, cái xác này là chiến binh nhà Trần năm 1288 bị nứt thời gian rơi về năm 938! Vụ án kết thúc!",
       nextNode: "victory"
     },
     "victory": {
       type: "end_screen",
       title: "LỖ HỔNG LỊCH SỬ ĐÃ ĐƯỢC VÁ",
-      text: "Độ chính xác: 100%. Lịch sử đã được bảo vệ."
+      text: "Độ chính xác: 100%."
     }
   }
 };
@@ -119,7 +118,7 @@ export default function App() {
               setCurrentScreen('trial');
             }} 
             onOpenBuilder={() => setCurrentScreen('builder')}
-            mockCasePayload={MOCK_CASE_DATA} 
+            mockCasePayload={demoCaseData} 
           />
         );
     }
@@ -128,7 +127,7 @@ export default function App() {
   return (
     <div className="w-full h-full bg-black flex items-center justify-center p-4">
         {/* Global wrapper matching prompt constraints: max-w-6xl mx-auto aspect-video */}
-        <div className="relative w-full max-w-6xl mx-auto aspect-video bg-gray-900 overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,1)] ring-4 ring-gray-800">
+        <div className="relative w-full max-w-6xl mx-auto aspect-video bg-gray-900 overflow-hidden flex flex-col font-sans shadow-[0_0_50px_rgba(0,0,0,1)] ring-4 ring-gray-800">
             {renderScreen()}
         </div>
     </div>
