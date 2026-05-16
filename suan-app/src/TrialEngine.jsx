@@ -77,7 +77,8 @@ export default function TrialEngine({ caseData, onExit }) {
         const t = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 0.1) {
-                    triggerDamage();
+                    showMessage("Hết thời gian! Hãy bình tĩnh suy nghĩ và nghe lại lời khai từ đầu.");
+                    setLineIdx(0);
                     return currentNode.timeLimit || 30;
                 }
                 return prev - 0.1;
@@ -93,9 +94,16 @@ export default function TrialEngine({ caseData, onExit }) {
     };
 
     const triggerDamage = () => {
-        setHp(prev => prev - (currentNode?.hpPenalty || 1));
         setDamageFlash(true);
         setTimeout(() => setDamageFlash(false), 200);
+        setHp(prev => {
+            const nextHp = prev - (currentNode?.hpPenalty || 1);
+            if (nextHp <= 0) {
+                showMessage("Đừng bỏ cuộc! Hãy thử suy luận theo hướng khác.");
+                return 1; // Educational forgiveness: Never drop below 1 HP
+            }
+            return nextHp;
+        });
     };
 
     const triggerObjectionEffect = (callback) => {
@@ -193,21 +201,6 @@ export default function TrialEngine({ caseData, onExit }) {
         });
     };
 
-    // Game Over & End Screen Logic
-    if (hp <= 0) {
-        return (
-            <div className="w-full h-full bg-black flex flex-col items-center justify-center p-20 select-none">
-                <h1 className="text-8xl font-black text-red-700 mb-8 drop-shadow-[0_0_20px_rgba(255,0,0,0.8)] tracking-widest">BẾ TẮC</h1>
-                <p className="text-3xl text-gray-400 font-mono max-w-4xl text-center mb-16 leading-relaxed bg-gray-900 p-8 border-t-4 border-b-4 border-red-900">
-                    Bạn đã thất bại trong việc tìm ra sự thật.
-                </p>
-                <button onClick={onExit} className="px-12 py-6 bg-red-800 text-white font-bold text-3xl border-4 border-white hover:bg-red-600 transition-colors shadow-[8px_8px_0_rgba(255,0,0,0.5)]">
-                    TRỞ VỀ WORKSHOP
-                </button>
-            </div>
-        );
-    }
-
     if (!currentNode) return <div className="text-white">Lỗi Dữ Liệu: Node "{currentNodeId}" không tồn tại.</div>;
 
     if (currentNode.type === "end_screen") {
@@ -283,8 +276,8 @@ export default function TrialEngine({ caseData, onExit }) {
                 
                 {/* Character Sprites */}
                 {!isInvestigation && (
-                    <div className="absolute bottom-0 flex justify-center pointer-events-none z-10">
-                        <div className="w-[500px] h-[600px] bg-center bg-cover border-8 border-gray-800 shadow-[0_0_50px_rgba(0,0,0,0.9)] animate-breathe" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop')` }}>
+                    <div className="absolute bottom-1/3 w-full flex justify-center pointer-events-none z-10">
+                        <div className="w-[30vw] min-w-[250px] max-w-[400px] aspect-[4/5] bg-center bg-cover border-8 border-gray-800 shadow-[0_0_50px_rgba(0,0,0,0.9)] animate-breathe" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop')` }}>
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
                         </div>
                     </div>
@@ -299,21 +292,30 @@ export default function TrialEngine({ caseData, onExit }) {
 
                 {/* Investigation Interactables */}
                 {isInvestigation && !activeInteractable && (
-                    <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-6 z-20 w-[600px]">
+                    <div className="absolute inset-0 top-16 bottom-1/3 z-20 flex items-center justify-center gap-8 px-10">
                         {currentNode.interactables?.map(act => {
                             const isDiscovered = inventoryIds.includes(act.unlocksEvidence);
+                            const bgImg = act.id.includes("body") ? "https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=400" : 
+                                          act.id.includes("wound") ? "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=400" : 
+                                          "https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?q=80&w=400";
                             return (
                                 <button 
                                     key={act.id}
                                     onClick={() => setActiveInteractable(act)}
-                                    className={`w-full text-left px-8 py-6 flex items-center justify-between border-4 shadow-[6px_6px_0_rgba(0,0,0,0.8)] font-bold text-2xl transition-all ${
+                                    className={`relative flex-1 max-w-sm aspect-square border-8 shadow-[10px_10px_0_rgba(0,0,0,0.8)] overflow-hidden group transition-transform hover:-translate-y-4 ${
                                         isDiscovered 
-                                            ? 'bg-gray-800 text-gray-500 border-gray-600' 
-                                            : 'bg-black/90 text-white border-yellow-600 hover:bg-yellow-900/50 hover:scale-105'
+                                            ? 'border-gray-600 grayscale opacity-80' 
+                                            : 'border-[#8c7355] hover:border-yellow-500'
                                     }`}
                                 >
-                                    <span>{act.name}</span>
-                                    <Search className={`w-8 h-8 ${isDiscovered ? 'text-gray-600' : 'text-yellow-500 animate-pulse'}`} />
+                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${bgImg})` }} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+                                    <div className="absolute bottom-6 left-0 right-0 px-4 text-center">
+                                        <h3 className={`font-black text-2xl tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] ${isDiscovered ? 'text-gray-400' : 'text-yellow-500'}`}>{act.name}</h3>
+                                        <div className="mt-4 flex justify-center">
+                                            <Search className={`w-10 h-10 ${isDiscovered ? 'text-gray-600' : 'text-white animate-pulse'}`} />
+                                        </div>
+                                    </div>
                                 </button>
                             );
                         })}
